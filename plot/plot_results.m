@@ -1,6 +1,7 @@
 clear; close all;
 
 filename = "../results/50x50.json";
+save_name = 'x50x50x';
 
 res = jsondecode(fileread(filename));
 
@@ -14,11 +15,11 @@ visibilitySlices = res.MG.VisibilitySlices;
 startTime = 0;
 endTime = drones(1).EndTime;
 
-% for droneID = 1:length(drones)
-%     if drones(droneID).EndTime > endTime
-%         endTime = drones(droneID).EndTime;
-%     end
-% end
+for droneID = 1:length(drones)
+    if drones(droneID).EndTime > endTime
+        endTime = drones(droneID).EndTime;
+    end
+end
 
 movie = [];
 
@@ -36,7 +37,10 @@ C = [r1 + (r2 - r1) / maxTerrHeight * c; ...
      b1 + (b2 - b1) / maxTerrHeight * c]' / 225;
 % colormap(C); % set the colors to green
 
-for time = 0:length(path)-1
+% for time = 0:length(path)-1
+disp(size(path));
+pause
+for time = 0:endTime-1
     visibilityAtTime = visibilitySlices(time+1).Visible;
     h = figure;
     hold on;
@@ -57,8 +61,10 @@ for time = 0:length(path)-1
     H = visibilityRegion;
     
     s = surf(G, H);
-%     colormap("summer")
-    plot3(path(time+1, 1), path(time+1, 2), G(path(time+1, 1), path(time+1, 2)) + 1, '.c', 'MarkerSize', 30);
+
+    if size(path, 1) > time + 1
+        plot3(path(time+1, 1), path(time+1, 2), G(path(time+1, 2), path(time+1, 1)) + 1, '.c', 'MarkerSize', 30);
+    end
     title(['t = ' num2str(time+1)])
     
     for droneID = 1:length(drones)
@@ -68,12 +74,14 @@ for time = 0:length(path)-1
         endPosition = [drone.Destination.X, drone.Destination.Y];
         if time >= drone.StartTime && time <= drone.EndTime
             position = (time-drone.StartTime) * velocity + startPosition + 1;
-            plot3(position(1), position(2), 1, '.y', 'MarkerSize', 30);
+            plot3(position(1), position(2), G(floor(position(2)), floor(position(1))) + 1, '.y', 'MarkerSize', 30);
         end
     end
     
     view([30 30]);
     movie = [movie, getframe(h)];
     zlim([0 35]);
+    saveas(gcf, ['./plots/' num2str(time, '%03.f') '_' save_name  '.png']);
+    close all;
+%     pause
 end
-

@@ -81,7 +81,7 @@ func ComputeGraph(terrain *Terrain, drones []*Drone) *SmugglerMovementGraph {
 					for _, pair := range PossibleSmugglerDirections {
 						new_x := x + pair[1]
 						new_y := y + pair[0]
-						if new_y < terrain.Height && new_y > 0 && new_x < terrain.Width && new_x > 0 {
+						if new_y < terrain.Height && new_y >= 0 && new_x < terrain.Width && new_x >= 0 {
 							isAnotherVisible := visibilitySlices[slice+1].Visible[new_y][new_x]
 							if !isAnotherVisible {
 								e := g.NewEdge(g.Node(terrain.SliceCoordToNode(slice, x, y)), g.Node(terrain.SliceCoordToNode(slice+1, new_x, new_y)))

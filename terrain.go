@@ -95,10 +95,10 @@ func (d *Drone) GetVisibilityLine(t *Terrain, time float64, p Vector2) ([]Vector
 	visibility := make([]bool, len(points))
 
 	for i, point := range points {
-		if t.GetHeight(point) > (DronesHeight-t.GetHeight(p))*PointToPointDistance(point, p)/PointToPointDistance(p, *currentPosition)+t.GetHeight(p) {
+		if t.GetHeight(point) > (DronesHeight+t.GetHeight(*currentPosition)-t.GetHeight(p))*PointToPointDistance(point, p)/PointToPointDistance(p, *currentPosition)+t.GetHeight(p) {
 			return nil, visibility
 		} else {
-			visibility[i] = true
+			visibility[i] = true //TODO: fix it
 		}
 	}
 
@@ -219,12 +219,14 @@ func (t *Terrain) ComputeVisibilityAtTime(time float64, drones []*Drone) *Terrai
 		for y := 0; y < t.Height; y++ {
 			if !v[y][x] {
 				for _, drone := range drones {
-					points, visibility := drone.GetVisibilityLine(t, time, Vector2{float64(x), float64(y)})
+					if drone.ExistsAtTime(time) {
+						points, visibility := drone.GetVisibilityLine(t, time, Vector2{float64(x), float64(y)})
 
-					for i := 0; i < len(points); i++ {
-						if visibility[i] {
-							point := points[i]
-							v[int(point.Y)][int(point.X)] = true
+						for i := 0; i < len(points); i++ {
+							if visibility[i] {
+								point := points[i]
+								v[int(point.Y)][int(point.X)] = true
+							}
 						}
 					}
 				}
